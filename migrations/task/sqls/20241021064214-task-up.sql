@@ -297,4 +297,30 @@ VALUES
 	AND join_at IS NOT NULL
 	GROUP BY   user_id;
 
+-- ████████  █████   █     ███  
+--   █ █   ██    █  █     █     
+--   █ █████ ███ ███      ████  
+--   █ █   █    ██  █     █   █ 
+--   █ █   █████ █   █     ███  
+-- ===================== ====================
+-- 6. 後台報表
+-- 6-1 查詢：查詢專長為重訓的教練，並按經驗年數排序，由資深到資淺（需使用 inner join 與 order by 語法)
+-- 顯示須包含以下欄位： 教練名稱 , 經驗年數, 專長名稱
+
+	SELECT 
+	    d.name AS 教練名稱,
+	    b.experience_years AS 經驗年數,
+	    c.name AS 專長名稱
+	FROM 
+	    "COACH_LINK_SKILL" AS a
+	INNER JOIN 
+	    "COACH" AS b ON a.coach_id = b.id
+	INNER JOIN 
+	    "SKILL" AS c ON a.skill_id = c.id
+	INNER JOIN 
+	    "USER" AS d ON b.user_id = d.id
+	WHERE 
+	    c.name = '重訓'
+	ORDER BY 
+	    b.experience_years DESC;
 

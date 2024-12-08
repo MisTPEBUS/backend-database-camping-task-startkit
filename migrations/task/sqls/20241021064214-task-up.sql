@@ -403,9 +403,9 @@ ORDER BY
 -- 顯示須包含以下欄位： 預約會員人數
 
     SELECT 
-        COUNT(DISTINCT "COURSE_BOOKING".user_id) AS 預約會員人數
-    FROM 
+        COUNT(DISTINCT user_id) AS 預約會員人數
+    FROM  
         "COURSE_BOOKING"
     WHERE 
-         a.purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00'
-        AND "COURSE_BOOKING".cancelled_at IS NOT NULL;
+        purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00'
+        AND cancelled_at IS NOT NULL;

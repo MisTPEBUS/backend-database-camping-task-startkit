@@ -297,6 +297,36 @@ VALUES
 	AND join_at IS NOT NULL
 	GROUP BY   user_id;
 
+-- 5-8. [挑戰題] 查詢：請在一次查詢中，計算用戶王小明的剩餘可用堂數，顯示須包含以下欄位： user_id , remaining_credit
+    -- 提示：
+    -- select ("CREDIT_PURCHASE".total_credit - "COURSE_BOOKING".used_credit) as remaining_credit, ...
+    -- from ( 用戶王小明的購買堂數 ) as "CREDIT_PURCHASE"
+    -- inner join ( 用戶王小明的已使用堂數) as "COURSE_BOOKING"
+    -- on "COURSE_BOOKING".user_id = "CREDIT_PURCHASE".user_id;
+SELECT 
+    a.user_id,
+    (a.total_credit - COALESCE(b.used_credit, 0)) AS remaining_credit
+FROM 
+    (SELECT 
+         user_id, 
+         SUM(purchased_credits) AS total_credit
+     FROM "CREDIT_PURCHASE"
+     WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明')
+     GROUP BY user_id
+    ) AS a
+LEFT JOIN 
+    (SELECT 
+         user_id, 
+         COUNT(*) AS used_credit
+     FROM "COURSE_BOOKING"
+     WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明') 
+       AND status NOT IN ('課程已取消')
+     GROUP BY user_id
+    ) AS b
+ON 
+    a.user_id = b.user_id;
+
+
 -- ████████  █████   █     ███  
 --   █ █   ██    █  █     █     
 --   █ █████ ███ ███      ████  
@@ -340,25 +370,3 @@ VALUES
     ORDER BY 
         coach_total desc
     limit 1
-
--- 6-4. 查詢：計算 11 月份總營收（使用 purchase_at 欄位統計）
--- 顯示須包含以下欄位： 總營收
-    SELECT 
-        SUM("CREDIT_PURCHASE".price_paid) AS 總營收
-    FROM 
-        "CREDIT_PURCHASE"
-    WHERE 
-        DATE_PART('month', "CREDIT_PURCHASE".purchase_at) = 11
-        AND DATE_PART('year', "CREDIT_PURCHASE".purchase_at) = DATE_PART('year', CURRENT_DATE);
-
--- 6-5. 查詢：計算 11 月份有預約課程的會員人數（需使用 Distinct，並用 created_at 和 status 欄位統計）
--- 顯示須包含以下欄位： 預約會員人數
-
-    SELECT 
-        COUNT(DISTINCT "COURSE_BOOKING".user_id) AS 預約會員人數
-    FROM 
-        "COURSE_BOOKING"
-    WHERE 
-        DATE_PART('month', "COURSE_BOOKING".created_at) = 11
-        AND DATE_PART('year', "COURSE_BOOKING".created_at) = DATE_PART('year', CURRENT_DATE)
-        AND "COURSE_BOOKING".cancelled_at IS NOT NULL;

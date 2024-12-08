@@ -324,3 +324,37 @@ VALUES
 	ORDER BY 
 	    b.experience_years DESC;
 
+
+-- 6-2 查詢：查詢每種專長的教練數量，並只列出教練數量最多的專長（需使用 group by, inner join 與 order by 與 limit 語法）
+-- 顯示須包含以下欄位： 專長名稱, coach_total
+
+    SELECT 
+        b.name AS 專長名稱,
+        COUNT(a.coach_id) AS coach_total
+    FROM 
+        "COACH_LINK_SKILL" as a
+    INNER JOIN 
+        "SKILL" as b ON  a.skill_id = b.id
+    GROUP BY 
+        b.name
+    ORDER BY 
+        coach_total desc
+    limit 1
+
+-- 6-3. 查詢：計算 11 月份組合包方案的銷售數量
+-- 顯示須包含以下欄位： 組合包方案名稱, 銷售數量
+
+SELECT 
+    b.name AS 組合包方案名稱,
+    COUNT(a.id) AS 銷售數量
+FROM 
+    "CREDIT_PURCHASE" AS a
+INNER JOIN 
+    "CREDIT_PACKAGE" AS b  ON a.credit_package_id = b.id
+WHERE 
+    DATE_PART('month', a.purchase_at) = 11
+    AND DATE_PART('year', a.purchase_at) = DATE_PART('year', CURRENT_DATE)
+GROUP BY 
+    b.name
+ORDER BY 
+    銷售數量 DESC;

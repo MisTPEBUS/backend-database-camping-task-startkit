@@ -340,3 +340,25 @@ VALUES
     ORDER BY 
         coach_total desc
     limit 1
+
+-- 6-4. 查詢：計算 11 月份總營收（使用 purchase_at 欄位統計）
+-- 顯示須包含以下欄位： 總營收
+    SELECT 
+        SUM("CREDIT_PURCHASE".price_paid) AS 總營收
+    FROM 
+        "CREDIT_PURCHASE"
+    WHERE 
+        DATE_PART('month', "CREDIT_PURCHASE".purchase_at) = 11
+        AND DATE_PART('year', "CREDIT_PURCHASE".purchase_at) = DATE_PART('year', CURRENT_DATE);
+
+-- 6-5. 查詢：計算 11 月份有預約課程的會員人數（需使用 Distinct，並用 created_at 和 status 欄位統計）
+-- 顯示須包含以下欄位： 預約會員人數
+
+    SELECT 
+        COUNT(DISTINCT "COURSE_BOOKING".user_id) AS 預約會員人數
+    FROM 
+        "COURSE_BOOKING"
+    WHERE 
+        DATE_PART('month', "COURSE_BOOKING".created_at) = 11
+        AND DATE_PART('year', "COURSE_BOOKING".created_at) = DATE_PART('year', CURRENT_DATE)
+        AND "COURSE_BOOKING".cancelled_at IS NOT NULL;

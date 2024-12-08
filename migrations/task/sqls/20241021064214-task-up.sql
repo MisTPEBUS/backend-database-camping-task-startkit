@@ -303,28 +303,7 @@ VALUES
     -- from ( 用戶王小明的購買堂數 ) as "CREDIT_PURCHASE"
     -- inner join ( 用戶王小明的已使用堂數) as "COURSE_BOOKING"
     -- on "COURSE_BOOKING".user_id = "CREDIT_PURCHASE".user_id;
-    SELECT 
-        a.user_id,
-        (a.total_credit - COALESCE(b.used_credit, 0)) AS remaining_credit
-    FROM 
-        (SELECT 
-            user_id, 
-            SUM(purchased_credits) AS total_credit
-        FROM "CREDIT_PURCHASE"
-        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明')
-        GROUP BY user_id
-        ) AS a
-    LEFT JOIN 
-        (SELECT 
-            user_id, 
-            COUNT(*) AS used_credit
-        FROM "COURSE_BOOKING"
-        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明') 
-        AND status NOT IN ('課程已取消')
-        GROUP BY user_id
-        ) AS b
-    ON 
-        a.user_id = b.user_id;
+   
 
 
 -- ████████  █████   █     ███  
@@ -370,23 +349,5 @@ VALUES
     ORDER BY 
         coach_total desc
     limit 1
-
--- 6-3. 查詢：計算 11 月份組合包方案的銷售數量
--- 顯示須包含以下欄位： 組合包方案名稱, 銷售數量
-
-SELECT 
-    b.name AS 組合包方案名稱,
-    COUNT(a.id) AS 銷售數量
-FROM 
-    "CREDIT_PURCHASE" AS a
-INNER JOIN 
-    "CREDIT_PACKAGE" AS b ON a.credit_package_id = b.id
-WHERE 
-    a.purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00'
-GROUP BY 
-    b.name
-ORDER BY 
-    銷售數量 DESC;
-
 
 

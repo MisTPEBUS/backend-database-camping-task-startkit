@@ -353,19 +353,7 @@ VALUES
 -- 6-3. 查詢：計算 11 月份組合包方案的銷售數量
 -- 顯示須包含以下欄位： 組合包方案名稱, 銷售數量
 
-SELECT 
-    b.name AS 組合包方案名稱,
-    COUNT(a.id) AS 銷售數量
-FROM 
-    "CREDIT_PURCHASE" AS a
-INNER JOIN 
-    "CREDIT_PACKAGE" AS b ON a.credit_package_id = b.id
-WHERE 
-    a.purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00'
-GROUP BY 
-    b.name
-ORDER BY 
-    銷售數量 DESC;
+
 
 
 -- 6-4. 查詢：計算 11 月份總營收（使用 purchase_at 欄位統計）

@@ -304,6 +304,23 @@ VALUES
     -- inner join ( 用戶王小明的已使用堂數) as "COURSE_BOOKING"
     -- on "COURSE_BOOKING".user_id = "CREDIT_PURCHASE".user_id;
    
+    WITH CREDIT_PURCHASE AS (
+        SELECT  user_id, SUM(purchased_credits) AS total_credit
+        FROM "CREDIT_PURCHASE"
+        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明')
+        GROUP BY user_id
+    ),
+    COURSE_BOOKING AS (
+        SELECT  user_id, COUNT(*) AS used_credit
+        FROM "COURSE_BOOKING"
+        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明') 
+        AND status NOT IN ('課程已取消') -- 過濾不計入的狀態
+        GROUP BY user_id
+    )
+    SELECT CP.user_id, (CP.total_credit - COALESCE(CB.used_credit, 0)) AS remaining_credit
+    FROM CREDIT_PURCHASE as CP
+    LEFT JOIN   COURSE_BOOKING as CB ON   CP.user_id = CB.user_id;
+
 
 
 -- ████████  █████   █     ███  
@@ -352,26 +369,43 @@ VALUES
 
 -- 6-3. 查詢：計算 11 月份組合包方案的銷售數量
 -- 顯示須包含以下欄位： 組合包方案名稱, 銷售數量
-
+SELECT 
+    b.name AS 組合包方案名稱,
+    COUNT(a.id) AS 銷售數量
+FROM 
+    "CREDIT_PURCHASE" AS a
+INNER JOIN 
+    "CREDIT_PACKAGE" AS b  ON a.credit_package_id = b.id
+WHERE 
+    DATE_PART('month', a.purchase_at) = 11
+    AND DATE_PART('year', a.purchase_at) = DATE_PART('year', CURRENT_DATE)
+GROUP BY 
+    b.name
+ORDER BY 
+    銷售數量 DESC;
 
 
 
 -- 6-4. 查詢：計算 11 月份總營收（使用 purchase_at 欄位統計）
 -- 顯示須包含以下欄位： 總營收
-     SELECT 
-        COALESCE(SUM(price_paid), 0) AS 總營收
+    SELECT 
+        COALESCE(SUM("CREDIT_PURCHASE".price_paid), 0) AS 總營收
     FROM 
         "CREDIT_PURCHASE"
     WHERE 
-         purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00';
+         a.purchase_at BETWEEN '2024-11-01 00:00:00' AND '2024-12-01 00:00:00';
+
 -- 6-5. 查詢：計算 11 月份有預約課程的會員人數（需使用 Distinct，並用 created_at 和 status 欄位統計）
 -- 顯示須包含以下欄位： 預約會員人數
 
-	SELECT
+  SELECT 
     COUNT(DISTINCT user_id) AS 預約會員人數
-    FROM "COURSE_BOOKING"
-    WHERE created_at >= '2024-11-01 00:00:00'
-    AND created_at <= '2024-11-30 23:59:59' AND status != '課程已取消';
+    FROM  
+        "COURSE_BOOKING"
+    WHERE 
+    created_at BETWEEN '2024-11-01 00:00:00' AND '2024-11-30 23:59:59'
+    AND status NOT IN ('課程已取消');
+	
 	
 
 

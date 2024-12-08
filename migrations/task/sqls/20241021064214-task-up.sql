@@ -303,22 +303,7 @@ VALUES
     -- inner join ( 用戶王小明的已使用堂數) as "COURSE_BOOKING"
     -- on "COURSE_BOOKING".user_id = "CREDIT_PURCHASE".user_id;
 
-    WITH CREDIT_PURCHASE AS (
-        SELECT  user_id, SUM(purchased_credits) AS total_credit
-        FROM "CREDIT_PURCHASE"
-        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明')
-        GROUP BY user_id
-    ),
-    COURSE_BOOKING AS (
-        SELECT  user_id, COUNT(*) AS used_credit
-        FROM "COURSE_BOOKING"
-        WHERE user_id = (SELECT id FROM "USER" WHERE name = '王小明') 
-        AND status NOT IN ('課程已取消') -- 過濾不計入的狀態
-        GROUP BY user_id
-    )
-    SELECT CP.user_id, (CP.total_credit - COALESCE(CB.used_credit, 0)) AS remaining_credit
-    FROM CREDIT_PURCHASE as CP
-    LEFT JOIN   COURSE_BOOKING as CB ON   CP.user_id = CB.user_id;
+   
 
 -- ████████  █████   █     ███  
 --   █ █   ██    █  █     █     
